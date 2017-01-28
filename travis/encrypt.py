@@ -47,9 +47,7 @@ def encrypt_key(key, password):
 @click.argument('repository')
 @click.argument('path', type=click.Path(exists=True), required=False)
 @click.option('--password', prompt=True, hide_input=True, confirmation_prompt=False, help="The password to be encrypted.")
-@click.option('--deploy', is_flag=True, help="Write to .travis.yml for deployment.")
-@click.option('--env', is_flag=True, help="Write to .travis.yml for environment variable use.")
-def cli(username, repository, path, password, deploy, env):
+def cli(username, repository, path, password):
     """Encrypt passwords and environment variables for use with Travis CI.
 
     Travis Encrypt requires as arguments the user's GitHub username and repository name.
@@ -65,14 +63,7 @@ def cli(username, repository, path, password, deploy, env):
         with open(path) as conffile:
             config = yaml.load(conffile)
 
-        if deploy:
-            config.setdefault('deploy', {}).setdefault('password', {})['secure'] = encrypted_password
-
-        elif env:
-            config.setdefault('env', {}).setdefault('global', {})['secure'] = encrypted_password
-
-        else:
-            config.setdefault('password', {})['secure'] = encrypted_password
+        config.setdefault('password', {})['secure'] = encrypted_password
 
         with open(path, 'w') as conffile:
             yaml.dump(config, conffile, default_flow_style=False)
